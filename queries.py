@@ -1,8 +1,8 @@
 """
 queries.py
 ==========
-CIS 3120 · MP02 — SQL and Database
-Author 2 module — all query functions
+CIS 3120 - MP02 - SQL and Database
+Author 2 module - all query functions
 
 CONTRACT SUMMARY
 ----------------
@@ -28,9 +28,9 @@ IMPORTANT:
 import sqlite3
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 # FUNCTION 1 — Playlist track listing
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 
 def get_playlist_tracks(conn, playlist_name):
     """Return all tracks on the named playlist, ordered by position.
@@ -67,21 +67,44 @@ def get_playlist_tracks(conn, playlist_name):
     #   JOIN Playlist p  ON pt.playlist_id = p.playlist_id
     #   WHERE p.playlist_name = ?
     #
-    # Your query here:
-    # TODO: replace the stub query below with your actual SELECT statement.
-    #       The stub returns an empty result set so the function is callable
-    #       before implementation.  The ? placeholder must match playlist_name.
     query = """
-        SELECT 'TODO' AS title, 'TODO' AS artist_name,
-               0 AS duration_seconds, 0 AS position
-        WHERE ? IS NULL
+        SELECT
+            t.title,
+            a.name,
+            t.duration_seconds,
+            pt.position
+        FROM
+            PlaylistTrack pt
+        JOIN
+            Track t ON pt.track_id = t.track_id
+        JOIN
+            Artist a ON t.artist_id = a.artist_id
+        JOIN
+            Playlist p ON pt.playlist_id = p.playlist_id
+        WHERE
+            p.playlist_name = ?
+        ORDER BY
+            pt.position ASC
     """
     return conn.execute(query, (playlist_name,)).fetchall()
 
+    # TODO: replace the stub query below with your actual SELECT statement.
+    #       The stub returns an empty result set so the function is callable
+    #       before implementation.  The ? placeholder must match playlist_name.
+    # Original stub query:
+    # query = """
+    #     SELECT
+    #         'TODO' AS title,
+    #         'TODO' AS artist_name,
+    #         0 AS duration_seconds,
+    #         0 AS position
+    # """
+    # return conn.execute(query, (playlist_name,)).fetchall()
 
-# ─────────────────────────────────────────────────────────────────────────────
+
+# ─────────────────────────────────────────────────────
 # FUNCTION 2 — Tracks on no playlist
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 
 def get_tracks_on_no_playlist(conn):
     """Return all tracks that do not appear on any playlist.
@@ -113,18 +136,26 @@ def get_tracks_on_no_playlist(conn):
     #   LEFT JOIN PlaylistTrack pt ON t.track_id = pt.track_id
     #   WHERE  pt.track_id IS NULL
     #
-    # Your query here:
     query = """
-        -- TODO: replace this comment with your SELECT statement
-        SELECT 0 AS track_id, 'TODO' AS title, 'TODO' AS artist_name
-        WHERE 1 = 0
+        SELECT
+            t.track_id,
+            t.title,
+            a.name
+        FROM
+            Track t
+        JOIN
+            Artist a ON t.artist_id = a.artist_id
+        LEFT JOIN
+            PlaylistTrack pt ON t.track_id = pt.track_id
+        WHERE
+            pt.track_id IS NULL
     """
     return conn.execute(query).fetchall()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 # FUNCTION 3 — Most-added track
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 
 def get_most_added_track(conn):
     """Return the single track that appears on the greatest number of playlists.
@@ -158,18 +189,27 @@ def get_most_added_track(conn):
     #   ORDER BY playlist_count DESC
     #   LIMIT 1
     #
-    # Your query here:
     query = """
-        -- TODO: replace this comment with your SELECT statement
-        SELECT 'TODO' AS title, 'TODO' AS artist_name, 0 AS playlist_count
-        WHERE 1 = 0
+        SELECT
+            t.title,
+            a.name,
+            COUNT(*) AS playlist_count
+        FROM
+            PlaylistTrack pt
+        JOIN
+            Track t ON pt.track_id = t.track_id
+        JOIN
+            Artist a ON t.artist_id = a.artist_id
+        GROUP BY pt.track_id
+        ORDER BY playlist_count DESC
+        LIMIT 1
     """
     return conn.execute(query).fetchone()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 # FUNCTION 4 — Playlist total durations
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 
 def get_playlist_durations(conn):
     """Return each playlist's name and total duration, longest first.
@@ -207,18 +247,25 @@ def get_playlist_durations(conn):
     #   GROUP BY p.playlist_id
     #   ORDER BY total_minutes DESC
     #
-    # Your query here:
     query = """
-        -- TODO: replace this comment with your SELECT statement
-        SELECT 'TODO' AS playlist_name, 0.0 AS total_minutes
-        WHERE 1 = 0
+        SELECT
+            p.playlist_name,
+            SUM(t.duration_seconds) / 60.0 AS total_minutes
+        FROM
+            Playlist p
+        JOIN
+            PlaylistTrack pt ON p.playlist_id = pt.playlist_id
+        JOIN
+            Track t ON pt.track_id = t.track_id
+        GROUP BY p.playlist_id
+        ORDER BY total_minutes DESC
     """
     return conn.execute(query).fetchall()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 # Standalone smoke test  (run:  python queries.py)
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     # This block builds a minimal in-memory database so Author 2 can test
