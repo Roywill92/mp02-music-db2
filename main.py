@@ -148,11 +148,6 @@ def delete_artist(conn):
 
     Catches IntegrityError and rolls back if any step fails.
     """
-    # TODO: prompt the user for an artist_id (integer input).
-    #       Print the artist's name and ask for confirmation before deleting.
-    #       Implement the three-step deletion sequence in the correct FK order.
-    #       Commit after all three steps succeed, or rollback on IntegrityError.
-
     try:
         artist_id_input = input("  Enter artist ID to delete: ").strip()
         artist_id = int(artist_id_input)
@@ -176,27 +171,27 @@ def delete_artist(conn):
 
     try:
         # Step 1 — remove PlaylistTrack rows for this artist's tracks
-        # TODO: write a DELETE statement that removes PlaylistTrack rows
-        #       where track_id IN (SELECT track_id FROM Track WHERE artist_id = ?)
-        conn.execute("""
-            -- TODO: DELETE FROM PlaylistTrack WHERE track_id IN (...)
-            SELECT 1 WHERE 1 = 0
+        result1 = conn.execute("""
+            DELETE FROM PlaylistTrack
+            WHERE track_id IN (
+                SELECT track_id FROM Track WHERE artist_id = ?
+            )
         """, (artist_id,))
+        pt_deleted = result1.rowcount
+        print(f"  Removed {pt_deleted} playlist assignment(s) for this artist's tracks.")
 
         # Step 2 — remove the artist's Track rows
-        # TODO: write a DELETE statement: DELETE FROM Track WHERE artist_id = ?
-        conn.execute("""
-            -- TODO: DELETE FROM Track WHERE artist_id = ?
-            SELECT 1 WHERE 1 = 0
+        result2 = conn.execute("""
+            DELETE FROM Track WHERE artist_id = ?
         """, (artist_id,))
+        tracks_deleted = result2.rowcount
+        print(f"  Removed {tracks_deleted} track(s) by this artist.")
 
         # Step 3 — remove the Artist row
-        # TODO: write a DELETE statement: DELETE FROM Artist WHERE artist_id = ?
-        conn.execute("""
-            -- TODO: DELETE FROM Artist WHERE artist_id = ?
-            SELECT 1 WHERE 1 = 0
+        result3 = conn.execute("""
+            DELETE FROM Artist WHERE artist_id = ?
         """, (artist_id,))
-
+        
         conn.commit()
         print(f"  '{artist_name}' and all associated tracks and playlist assignments removed.")
 
@@ -206,8 +201,6 @@ def delete_artist(conn):
     except Exception as e:
         conn.rollback()
         print(f"  Deletion failed — {type(e).__name__}: {e}")
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Startup
 # ─────────────────────────────────────────────────────────────────────────────
