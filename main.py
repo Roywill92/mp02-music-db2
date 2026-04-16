@@ -34,10 +34,10 @@ import os
 #       have merged their modules into main.
 
 from schema_data import build_database, seed_database
-# from queries    import (get_playlist_tracks,
-#                         get_tracks_on_no_playlist,
-#                         get_most_added_track,
-#                         get_playlist_durations)
+from queries    import (get_playlist_tracks,
+                        get_tracks_on_no_playlist,
+                        get_most_added_track,
+                        get_playlist_durations)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -83,7 +83,7 @@ def show_playlist_tracks(conn):
     # TODO: call get_playlist_tracks(conn, playlist_name)
     #       Print each row with position, title, artist, and formatted duration.
     #       If the list is empty, print a message saying no tracks were found.
-    rows = []  # replace with: get_playlist_tracks(conn, playlist_name)
+    rows = get_playlist_tracks(conn, playlist_name)
     if not rows:
         print(f"  No tracks found for playlist '{playlist_name}'.")
         return
@@ -98,7 +98,7 @@ def show_tracks_on_no_playlist(conn):
     # TODO: call get_tracks_on_no_playlist(conn)
     #       Print each row with track_id, title, and artist name.
     #       If the list is empty, print a message confirming all tracks are assigned.
-    rows = []  # replace with: get_tracks_on_no_playlist(conn)
+    rows = get_tracks_on_no_playlist(conn)
     if not rows:
         print("  All tracks are assigned to at least one playlist.")
         return
@@ -113,7 +113,7 @@ def show_most_added_track(conn):
     # TODO: call get_most_added_track(conn)
     #       Print the title, artist name, and playlist count.
     #       If the result is None, print a message that PlaylistTrack is empty.
-    row = None  # replace with: get_most_added_track(conn)
+    row = get_most_added_track(conn)
     if row is None:
         print("  No playlist assignments found.")
         return
@@ -127,7 +127,7 @@ def show_playlist_durations(conn):
     # TODO: call get_playlist_durations(conn)
     #       Print each row with playlist name and total duration formatted as M:SS.
     #       Duration values are returned in minutes (float); convert to seconds first.
-    rows = []  # replace with: get_playlist_durations(conn)
+    rows = get_playlist_durations(conn)
     if not rows:
         print("  No playlist data found.")
         return
